@@ -1,24 +1,42 @@
+import random
+
+
 class Stack:
     def __init__(self):
-        self.items = []
+        # self.items = []
+        self.__items = []
 
     def is_empty(self):
-        return True if len(self.items) == 0 else False
+        return True if len(self.__items) == 0 else False
+    def __bool__(self):
+        return bool(len(self))
 
     def push(self, item):
-        self.items.append(item)
+        self.__items.append(item)
 
     def pop(self):
-        return self.items.pop()
+        return self.__items.pop()
 
     def top(self):
-        return self.items[len(self.items) - 1]
+        return self.__items[len(self.__items) - 1]
 
     def size(self):
-        return len(self.items)
+        return len(self.__items)
+    # 使用 __len__ 方法替换
+    def __len__(self):
+        return len(self.__items)
 
     def pop_front(self):
-        return self.items.pop(0)
+        return self.__items.pop(0)
+# if __name__ ==  "__main__":
+#     a = Stack()
+#     a.push(1)
+#     a.push(2)
+#     a.push(3)
+#     print("stack: ", len(a), bool(a))
+#     [a.pop() for i in range(3)]
+#     print("stack: ", len(a), bool(a))
+    
 
 
 class Tree(object):
@@ -38,6 +56,20 @@ class Tree(object):
             self.left.preorder()
         if self.right is not None:
             self.right.preorder()
+    # 提高扩展性
+    def _preorder(self, func=None):
+        """
+        @func: 前序遍历
+        @params: 
+            * func: 操作函数
+        @return(None) 
+        @exp:
+            def disp(data):
+                print(data)
+            tree.preorder(disp)
+        """
+        func(self.data) or (self.left and self._preorder(func)) or (self.right and self._preorder(func))
+
 
     def inorder(self, result):
         """
@@ -173,6 +205,7 @@ def RPN2IN(str_list):
 
 
 def IsSym(ch):
+    return ch in "+-*/"
     hh = ["+", "-", "*", "/"]
     for i in range(len(hh)):
         if ch == hh[i]:
@@ -199,6 +232,32 @@ def Predence(sg_1, sg_2):
             return 1
         else:
             return 0
+
+# 运算符优先级判断(可扩展的)
+def op_priority_comparer(op_priority_map):
+    """
+    @func: 单字符运算符优先级判断
+    @params: 
+        * op_priority_map(dict): 运算符优先级映射表 -> {"*": 1, "/": 1, "+": 2, "-": 2, "(": 3, ")": 3}
+    @return(func): 优先级比较函数
+    """
+    def priority(op1, op2):
+        """  
+        @func: 比较 op1, op2的优先级 (op1 >= op2) -> True
+        """
+        return (op_priority_map[op1] <= op_priority_map[op2])
+    return priority
+# test
+if __name__ ==  "__main__":
+    # 自定义优先级映射
+    op_priority_map = {"*": 1, "/": 1, "+": 2, "-": 2, "(": 3, ")": 3}
+    # 构建优先级比较器
+    priority = op_priority_comparer(op_priority_map)
+    # test    
+    op = "".join(op_priority_map.keys())
+    for i in range(10):
+        op1, op2 = random.choice(op), random.choice(op)
+        print(f"({op1}, {op2}) -> ({priority(op1, op2)}, {Predence(op1, op2)})")
 
 
 def IN2RPN(inFix):
